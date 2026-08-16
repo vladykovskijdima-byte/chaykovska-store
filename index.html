@@ -38,7 +38,7 @@
   <h2 id="store-title">Каталог товарів</h2>
   
   <!-- Кнопка зв'язку з продавцем -->
-  <a class="contact-btn" href="#" onclick="Telegram.WebApp.openTelegramLink('https://t.me/chaykovska_maneger'); return false;">
+  <a class="contact-btn" href="#" onclick="Telegram.WebApp.openTelegramLink('https://tg.dev/resolve?domain=chaykovska_maneger'); return false;">
     💬 Зв'язатися з продавцем
   </a>
 
@@ -71,7 +71,7 @@
 
           if (title) {
             const message = encodeURIComponent(`Доброго дня! Хочу замовити товар: ${title} (${price} грн)`);
-            const orderUrl = `https://t.me/${TELEGRAM_USERNAME}?text=${message}`;
+            const orderUrl = `https://tg.dev/resolve?domain=${TELEGRAM_USERNAME}&text=${message}`;
             catalog.innerHTML += `
               <div class="card">
                 <img src="${image}" alt="${title}">
