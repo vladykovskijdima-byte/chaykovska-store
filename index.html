@@ -1,0 +1,68 @@
+<!DOCTYPE html>
+<html lang="uk">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Каталог товарів</title>
+  <script src="https://telegram.org/js/telegram-web-app.js"></script>
+  <style>
+    body { font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif; margin: 0; padding: 12px; background: #f4f4f5; color: #18181b; }
+    h2 { text-align: center; margin-bottom: 16px; font-size: 20px; font-weight: 700; }
+    .grid { display: grid; grid-template-columns: 1fr 1fr; gap: 12px; }
+    .card { background: #ffffff; border-radius: 14px; padding: 10px; box-shadow: 0 4px 12px rgba(0,0,0,0.05); display: flex; flex-direction: column; justify-content: space-between; }
+    .card img { width: 100%; height: 150px; object-fit: cover; border-radius: 10px; }
+    .title { font-weight: 600; margin: 8px 0 4px; font-size: 14px; line-height: 1.3; }
+    .price { color: #007aff; font-weight: 700; font-size: 15px; margin-bottom: 8px; }
+    .btn { background: #007aff; color: #ffffff; border: none; padding: 10px; border-radius: 8px; text-align: center; text-decoration: none; font-size: 13px; font-weight: 600; display: block; cursor: pointer; }
+    .btn:active { opacity: 0.8; }
+  </style>
+</head>
+<body>
+  <h2 id="store-title">Каталог товарів</h2>
+  <div class="grid" id="catalog">Завантаження каталогу...</div>
+
+  <script>
+    const tg = window.Telegram.WebApp;
+    tg.expand();
+
+    const SHEET_URL = 'https://docs.google.com/spreadsheets/d/1Gu_KMNTDkiMvkBdqrdGdClEcWa_H47q5R6Kdqhu7Wg8/edit?usp=drivesdk'; 
+    const TELEGRAM_USERNAME = 'chaykovska_manager'; 
+
+    async function loadProducts() {
+      try {
+        const id = SHEET_URL.match(/\/d\/([a-zA-Z0-9-_]+)/)[1];
+        const res = await fetch(`https://docs.google.com/spreadsheets/d/${id}/gviz/tq?tqx=out:json`);
+        const text = await res.text();
+        const json = JSON.parse(text.substr(47).slice(0, -2));
+        const rows = json.table.rows;
+
+        const catalog = document.getElementById('catalog');
+        catalog.innerHTML = '';
+
+        rows.forEach(row => {
+          const title = row.c[0]?.v || '';
+          const category = row.c[1]?.v || '';
+          const price = row.c[2]?.v || 0;
+          const image = row.c[3]?.v || '';
+          const desc = row.c[4]?.v || '';
+
+          if (title) {
+            const message = encodeURIComponent(`Доброго дня! Хочу замовити товар: ${title} (${price} грн)`);
+            catalog.innerHTML += `
+              <div class="card">
+                <img src="${image}" alt="${title}">
+                <div class="title">${title}</div>
+                <div class="price">${price} грн</div>
+                <a class="btn" href="https://t.me/${TELEGRAM_USERNAME}?text=${message}">Замовити</a>
+              </div>
+            `;
+          }
+        });
+      } catch (e) {
+        document.getElementById('catalog').innerHTML = 'Помилка завантаження товарів. Перевірте посилання на таблицю.';
+      }
+    }
+    loadProducts();
+  </script>
+</body>
+</html>
