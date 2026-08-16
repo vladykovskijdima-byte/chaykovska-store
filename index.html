@@ -9,19 +9,34 @@
     body { font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif; margin: 0; padding: 12px; background: #f4f4f5; color: #18181b; }
     h2 { text-align: center; margin-bottom: 12px; font-size: 20px; font-weight: 700; }
     
-    /* Стиль для кнопки зв'язку */
+    /* Блок связи с продавцом */
+    .contact-card {
+      background: #ffffff;
+      border-radius: 12px;
+      padding: 12px;
+      text-align: center;
+      margin-bottom: 16px;
+      box-shadow: 0 2px 8px rgba(0,0,0,0.06);
+    }
+    .contact-title {
+      font-size: 13px;
+      color: #71717a;
+      margin-bottom: 6px;
+      font-weight: 500;
+    }
     .contact-btn {
-      display: block;
+      display: inline-block;
+      width: 100%;
+      box-sizing: border-box;
       background: #24292e;
       color: #ffffff;
-      text-align: center;
-      text-decoration: none;
-      padding: 12px;
-      border-radius: 10px;
+      padding: 10px;
+      border-radius: 8px;
       font-size: 14px;
       font-weight: 600;
-      margin-bottom: 16px;
-      box-shadow: 0 2px 8px rgba(0,0,0,0.08);
+      cursor: pointer;
+      user-select: none;
+      transition: background 0.2s;
     }
     .contact-btn:active { opacity: 0.85; }
 
@@ -37,10 +52,11 @@
 <body>
   <h2 id="store-title">Каталог товарів</h2>
   
-  <!-- Кнопка зв'язку з продавцем -->
-  <a class="contact-btn" href="#" onclick="Telegram.WebApp.openTelegramLink('https://tg.dev/resolve?domain=chaykovska_maneger'); return false;">
-    💬 Зв'язатися з продавцем
-  </a>
+  <!-- Блок связи с продавцом -->
+  <div class="contact-card">
+    <div class="contact-title">Зв'язатися з продавцем:</div>
+    <div class="contact-btn" id="copy-btn" onclick="copyUsername()">📋 @chaykovska_maneger</div>
+  </div>
 
   <div class="grid" id="catalog">Завантаження каталогу...</div>
 
@@ -50,6 +66,19 @@
 
     const SHEET_URL = 'https://docs.google.com/spreadsheets/d/1Gu_KMNTDkiMvkBdqrdGdClEcWa_H47q5R6Kdqhu7Wg8/edit?usp=drivesdk'; 
     const TELEGRAM_USERNAME = 'chaykovska_maneger'; 
+
+    function copyUsername() {
+      navigator.clipboard.writeText('@' + TELEGRAM_USERNAME).then(() => {
+        const btn = document.getElementById('copy-btn');
+        const originalText = btn.innerText;
+        btn.innerText = '✅ Скопійовано!';
+        btn.style.background = '#34c759';
+        setTimeout(() => {
+          btn.innerText = '📋 @' + TELEGRAM_USERNAME;
+          btn.style.background = '#24292e';
+        }, 2000);
+      });
+    }
 
     async function loadProducts() {
       try {
@@ -64,20 +93,16 @@
 
         rows.forEach(row => {
           const title = row.c[0]?.v || '';
-          const category = row.c[1]?.v || '';
           const price = row.c[2]?.v || 0;
           const image = row.c[3]?.v || '';
-          const desc = row.c[4]?.v || '';
 
           if (title) {
-            const message = encodeURIComponent(`Доброго дня! Хочу замовити товар: ${title} (${price} грн)`);
-            const orderUrl = `https://tg.dev/resolve?domain=${TELEGRAM_USERNAME}&text=${message}`;
             catalog.innerHTML += `
               <div class="card">
                 <img src="${image}" alt="${title}">
                 <div class="title">${title}</div>
                 <div class="price">${price} грн</div>
-                <a class="btn" href="#" onclick="Telegram.WebApp.openTelegramLink('${orderUrl}'); return false;">Замовити</a>
+                <div class="btn" onclick="copyUsername()">Замовити</div>
               </div>
             `;
           }
