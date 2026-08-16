@@ -38,7 +38,7 @@
   <h2 id="store-title">Каталог товарів</h2>
   
   <!-- Кнопка зв'язку з продавцем -->
-  <a class="contact-btn" href="https://t.me/svetlana_kiriyenko" target="_blank">
+  <a class="contact-btn" href="#" onclick="Telegram.WebApp.openTelegramLink('https://t.me/chaykovska_maneger'); return false;">
     💬 Зв'язатися з продавцем
   </a>
 
@@ -49,7 +49,7 @@
     tg.expand();
 
     const SHEET_URL = 'https://docs.google.com/spreadsheets/d/1Gu_KMNTDkiMvkBdqrdGdClEcWa_H47q5R6Kdqhu7Wg8/edit?usp=drivesdk'; 
-    const TELEGRAM_USERNAME = 'chaykovska_manager'; 
+    const TELEGRAM_USERNAME = 'chaykovska_maneger'; 
 
     async function loadProducts() {
       try {
@@ -71,12 +71,13 @@
 
           if (title) {
             const message = encodeURIComponent(`Доброго дня! Хочу замовити товар: ${title} (${price} грн)`);
+            const orderUrl = `https://t.me/${TELEGRAM_USERNAME}?text=${message}`;
             catalog.innerHTML += `
               <div class="card">
                 <img src="${image}" alt="${title}">
                 <div class="title">${title}</div>
                 <div class="price">${price} грн</div>
-                <a class="btn" href="https://t.me/${TELEGRAM_USERNAME}?text=${message}">Замовити</a>
+                <a class="btn" href="#" onclick="Telegram.WebApp.openTelegramLink('${orderUrl}'); return false;">Замовити</a>
               </div>
             `;
           }
