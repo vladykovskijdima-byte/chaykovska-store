@@ -9,7 +9,7 @@
     body { font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif; margin: 0; padding: 12px; background: #f4f4f5; color: #18181b; }
     h2 { text-align: center; margin-bottom: 12px; font-size: 20px; font-weight: 700; }
     
-    /* Блок связи с продавцом */
+    /* Блок зв'язку з продавцем */
     .contact-card {
       background: #ffffff;
       border-radius: 12px;
@@ -42,17 +42,54 @@
 
     .grid { display: grid; grid-template-columns: 1fr 1fr; gap: 12px; }
     .card { background: #ffffff; border-radius: 14px; padding: 10px; box-shadow: 0 4px 12px rgba(0,0,0,0.05); display: flex; flex-direction: column; justify-content: space-between; }
-    .card img { width: 100%; height: 150px; object-fit: cover; border-radius: 10px; }
+    .card img { width: 100%; height: 140px; object-fit: cover; border-radius: 10px; }
     .title { font-weight: 600; margin: 8px 0 4px; font-size: 14px; line-height: 1.3; }
     .price { color: #007aff; font-weight: 700; font-size: 15px; margin-bottom: 8px; }
-    .btn { background: #007aff; color: #ffffff; border: none; padding: 10px; border-radius: 8px; text-align: center; text-decoration: none; font-size: 13px; font-weight: 600; display: block; cursor: pointer; }
-    .btn:active { opacity: 0.8; }
+    
+    /* Кнопки під товаром */
+    .btn-group { display: flex; gap: 6px; }
+    .btn-main { flex: 1; background: #007aff; color: #ffffff; border: none; padding: 10px; border-radius: 8px; text-align: center; font-size: 13px; font-weight: 600; cursor: pointer; }
+    .btn-more { width: 38px; height: 38px; background: #e4e4e7; color: #18181b; border: none; border-radius: 8px; display: flex; align-items: center; justify-content: center; font-size: 15px; cursor: pointer; flex-shrink: 0; }
+    .btn-main:active, .btn-more:active { opacity: 0.8; }
+
+    /* Модальне вікно (Popup) */
+    .modal-overlay {
+      position: fixed; top: 0; left: 0; right: 0; bottom: 0;
+      background: rgba(0,0,0,0.5); display: none;
+      align-items: flex-end; justify-content: center; z-index: 1000;
+    }
+    .modal-card {
+      background: #ffffff; width: 100%; max-height: 85vh;
+      border-top-left-radius: 20px; border-top-right-radius: 20px;
+      padding: 16px; box-sizing: border-box; overflow-y: auto;
+      position: relative; animation: slideUp 0.25s ease-out;
+    }
+    @keyframes slideUp { from { transform: translateY(100%); } to { transform: translateY(0); } }
+    .modal-close {
+      position: absolute; top: 12px; right: 16px;
+      background: #f4f4f5; border: none; border-radius: 50%;
+      width: 30px; height: 30px; font-size: 16px; cursor: pointer; font-weight: bold;
+    }
+    .modal-img { width: 100%; height: 200px; object-fit: cover; border-radius: 12px; margin-bottom: 12px; }
+    .modal-title { font-size: 18px; font-weight: 700; margin-bottom: 4px; }
+    .modal-price { font-size: 17px; color: #007aff; font-weight: 700; margin-bottom: 12px; }
+    .modal-label { font-size: 12px; color: #71717a; font-weight: 600; text-transform: uppercase; margin-top: 10px; margin-bottom: 4px; }
+    .modal-desc { font-size: 13px; color: #3f3f46; line-height: 1.4; }
+    
+    /* Плашки вибору розмірів */
+    .sizes-grid { display: flex; flex-wrap: wrap; gap: 8px; margin-bottom: 8px; }
+    .size-chip {
+      padding: 8px 12px; background: #f4f4f5; border: 1px solid #e4e4e7;
+      border-radius: 8px; font-size: 13px; font-weight: 600; cursor: pointer;
+    }
+    .size-chip.active { background: #007aff; color: #ffffff; border-color: #007aff; }
+    .size-info { font-size: 12px; color: #059669; font-weight: 500; min-height: 18px; margin-bottom: 12px; }
   </style>
 </head>
 <body>
   <h2 id="store-title">Каталог товарів</h2>
   
-  <!-- Блок связи с продавцом -->
+  <!-- Блок зв'язку з продавцем -->
   <div class="contact-card">
     <div class="contact-title">Зв'язатися з продавцем:</div>
     <div class="contact-btn" id="copy-btn" onclick="copyUsername()">📋 @chaykovska_maneger</div>
@@ -60,17 +97,41 @@
 
   <div class="grid" id="catalog">Завантаження каталогу...</div>
 
+  <!-- Модальне вікно деталей товару -->
+  <div class="modal-overlay" id="modal-overlay" onclick="closeModal(event)">
+    <div class="modal-card" onclick="event.stopPropagation()">
+      <button class="modal-close" onclick="closeModal()">✕</button>
+      <img id="modal-img" class="modal-img" src="" alt="">
+      <div id="modal-title" class="modal-title"></div>
+      <div id="modal-price" class="modal-price"></div>
+      
+      <div class="modal-label">Колір:</div>
+      <div id="modal-color" class="modal-desc">-</div>
+
+      <div class="modal-label">Опис:</div>
+      <div id="modal-desc" class="modal-desc">-</div>
+
+      <div class="modal-label">Оберіть розмір:</div>
+      <div id="sizes-grid" class="sizes-grid"></div>
+      <div id="size-info" class="size-info">Оберіть розмір для перегляду замірів</div>
+
+      <div class="btn-main" style="width: 100%; padding: 12px; box-sizing: border-box; margin-top: 10px;" id="modal-order-btn" onclick="copyOrderDetails()">Замовити обраний розмір</div>
+    </div>
+  </div>
+
   <script>
     const tg = window.Telegram.WebApp;
     tg.expand();
 
     const SHEET_URL = 'https://docs.google.com/spreadsheets/d/1Gu_KMNTDkiMvkBdqrdGdClEcWa_H47q5R6Kdqhu7Wg8/edit?usp=drivesdk'; 
     const TELEGRAM_USERNAME = 'chaykovska_maneger'; 
+    let productsData = [];
+    let selectedProduct = null;
+    let selectedSize = '';
 
     function copyUsername() {
       navigator.clipboard.writeText('@' + TELEGRAM_USERNAME).then(() => {
         const btn = document.getElementById('copy-btn');
-        const originalText = btn.innerText;
         btn.innerText = '✅ Скопійовано!';
         btn.style.background = '#34c759';
         setTimeout(() => {
@@ -90,19 +151,30 @@
 
         const catalog = document.getElementById('catalog');
         catalog.innerHTML = '';
+        productsData = [];
 
-        rows.forEach(row => {
+        rows.forEach((row, index) => {
           const title = row.c[0]?.v || '';
+          const category = row.c[1]?.v || '';
           const price = row.c[2]?.v || 0;
           const image = row.c[3]?.v || '';
+          const desc = row.c[4]?.v || 'Опис відсутній';
+          const color = row.c[5]?.v || 'Стандартний';
+          const sizesRaw = row.c[6]?.v || '';
 
           if (title) {
+            const product = { id: index, title, category, price, image, desc, color, sizesRaw };
+            productsData.push(product);
+
             catalog.innerHTML += `
               <div class="card">
                 <img src="${image}" alt="${title}">
                 <div class="title">${title}</div>
                 <div class="price">${price} грн</div>
-                <div class="btn" onclick="copyUsername()">Замовити</div>
+                <div class="btn-group">
+                  <div class="btn-main" onclick="copyUsername()">Замовити</div>
+                  <button class="btn-more" onclick="openModal(${index})" title="Докладніше">🔍</button>
+                </div>
               </div>
             `;
           }
@@ -111,6 +183,79 @@
         document.getElementById('catalog').innerHTML = 'Помилка завантаження товарів. Перевірте посилання на таблицю.';
       }
     }
+
+    function openModal(index) {
+      selectedProduct = productsData.find(p => p.id === index);
+      if (!selectedProduct) return;
+
+      selectedSize = '';
+      document.getElementById('modal-img').src = selectedProduct.image;
+      document.getElementById('modal-title').innerText = selectedProduct.title;
+      document.getElementById('modal-price').innerText = selectedProduct.price + ' грн';
+      document.getElementById('modal-desc').innerText = selectedProduct.desc;
+      document.getElementById('modal-color').innerText = selectedProduct.color;
+
+      const sizesGrid = document.getElementById('sizes-grid');
+      const sizeInfo = document.getElementById('size-info');
+      sizesGrid.innerHTML = '';
+      sizeInfo.innerText = 'Оберіть розмір для перегляду замірів';
+
+      // Парсимо розміри з колонки G
+      if (selectedProduct.sizesRaw) {
+        const sizesArr = selectedProduct.sizesRaw.split(',');
+        sizesArr.forEach(item => {
+          const match = item.trim().match(/^([^(]+)(?:\(([^)]+)\))?/);
+          if (match) {
+            const sizeName = match[1].trim();
+            const dimensions = match[2] ? match[2].trim() : '';
+
+            const chip = document.createElement('div');
+            chip.className = 'size-chip';
+            chip.innerText = sizeName;
+            chip.onclick = () => {
+              document.querySelectorAll('.size-chip').forEach(c => c.classList.remove('active'));
+              chip.classList.add('active');
+              selectedSize = sizeName;
+              sizeInfo.innerText = dimensions ? `Заміри (${sizeName}): ${dimensions}` : `Обрано розмір: ${sizeName}`;
+            };
+            sizesGrid.appendChild(chip);
+          }
+        });
+      } else {
+        sizesGrid.innerHTML = '<span style="font-size:13px; color:#71717a;">Без розміру</span>';
+      }
+
+      document.getElementById('modal-overlay').style.display = 'flex';
+    }
+
+    function closeModal(e) {
+      if (!e || e.target.id === 'modal-overlay' || e.target.classList.contains('modal-close')) {
+        document.getElementById('modal-overlay').style.display = 'none';
+      }
+    }
+
+    function copyOrderDetails() {
+      let textToCopy = `@${TELEGRAM_USERNAME}`;
+      if (selectedProduct) {
+        textToCopy = `Доброго дня! Хочу замовити: ${selectedProduct.title} (${selectedProduct.price} грн).`;
+        if (selectedSize) {
+          textToCopy += ` Розмір: ${selectedSize}.`;
+        }
+        textToCopy += ` Менеджер: @${TELEGRAM_USERNAME}`;
+      }
+
+      navigator.clipboard.writeText(textToCopy).then(() => {
+        const btn = document.getElementById('modal-order-btn');
+        btn.innerText = '✅ Деталі замовлення скопійовано!';
+        btn.style.background = '#34c759';
+        setTimeout(() => {
+          btn.innerText = 'Замовити обраний розмір';
+          btn.style.background = '#007aff';
+          closeModal();
+        }, 2000);
+      });
+    }
+
     loadProducts();
   </script>
 </body>
