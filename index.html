@@ -57,26 +57,55 @@
       cursor: pointer;
     }
 
-    /* Список категорий (Большие блоки) */
-    .categories-list {
-      display: flex;
-      flex-direction: column;
+    /* Сетка категорий (Большие квадратные карточки по 2 в ряд) */
+    .categories-grid {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
       gap: 12px;
     }
     .category-card {
       background: #ffffff;
-      border-radius: 14px;
-      padding: 18px;
+      border-radius: 16px;
+      padding: 10px;
       box-shadow: 0 4px 12px rgba(0,0,0,0.05);
       display: flex;
+      flex-direction: column;
       justify-content: space-between;
-      align-items: center;
+      height: 190px;
+      box-sizing: border-box;
       cursor: pointer;
       transition: transform 0.15s;
     }
-    .category-card:active { transform: scale(0.98); }
-    .category-name { font-size: 16px; font-weight: 700; color: #18181b; }
-    .category-count { font-size: 13px; color: #71717a; font-weight: 500; }
+    .category-card:active { transform: scale(0.96); }
+    .category-img {
+      width: 100%;
+      height: 125px;
+      object-fit: cover;
+      border-radius: 10px;
+      background: #f4f4f5;
+    }
+    .category-info {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      margin-top: 6px;
+    }
+    .category-name {
+      font-size: 15px;
+      font-weight: 700;
+      color: #18181b;
+      white-space: nowrap;
+      overflow: hidden;
+      text-overflow: ellipsis;
+    }
+    .category-count {
+      font-size: 11px;
+      color: #71717a;
+      background: #f4f4f5;
+      padding: 3px 6px;
+      border-radius: 8px;
+      font-weight: 600;
+    }
 
     /* Сетка товаров */
     .grid { display: grid; grid-template-columns: 1fr 1fr; gap: 12px; }
@@ -85,13 +114,13 @@
     .title { font-weight: 600; margin: 8px 0 4px; font-size: 14px; line-height: 1.3; }
     .price { color: #007aff; font-weight: 700; font-size: 15px; margin-bottom: 8px; }
     
-    /* Кнопки под товаром (Замовити и под ней Докладніше) */
+    /* Кнопки под товаром */
     .btn-group { display: flex; flex-direction: column; gap: 6px; }
     .btn-main { width: 100%; background: #007aff; color: #ffffff; border: none; padding: 9px 0; border-radius: 8px; text-align: center; font-size: 13px; font-weight: 600; cursor: pointer; box-sizing: border-box; }
     .btn-more { width: 100%; background: #e4e4e7; color: #18181b; border: none; padding: 9px 0; border-radius: 8px; text-align: center; font-size: 13px; font-weight: 600; cursor: pointer; box-sizing: border-box; }
     .btn-main:active, .btn-more:active { opacity: 0.8; }
 
-    /* Модальное окно по центру экрана */
+    /* Модальное окно деталей товара */
     .modal-overlay {
       position: fixed; top: 0; left: 0; right: 0; bottom: 0;
       background: rgba(0, 0, 0, 0.55); display: none;
@@ -123,7 +152,6 @@
     .modal-label { font-size: 12px; color: #71717a; font-weight: 600; text-transform: uppercase; margin-top: 10px; margin-bottom: 4px; }
     .modal-desc { font-size: 13px; color: #3f3f46; line-height: 1.4; }
     
-    /* Плашки выбора размеров */
     .sizes-grid { display: flex; flex-wrap: wrap; gap: 8px; margin-bottom: 8px; }
     .size-chip {
       padding: 8px 12px; background: #f4f4f5; border: 1px solid #e4e4e7;
@@ -145,7 +173,7 @@
 
   <!-- Контейнер категорий и товаров -->
   <div id="main-content">
-    <div class="categories-list" id="categories-container">Завантаження категорій...</div>
+    <div class="categories-grid" id="categories-container">Завантаження категорій...</div>
   </div>
 
   <!-- Модальное окно деталей товара -->
@@ -223,25 +251,36 @@
     }
 
     function renderCategories() {
-      const categoriesContainer = document.getElementById('main-content');
+      const mainContent = document.getElementById('main-content');
       const categoriesMap = {};
 
       productsData.forEach(p => {
-        categoriesMap[p.category] = (categoriesMap[p.category] || 0) + 1;
+        if (!categoriesMap[p.category]) {
+          categoriesMap[p.category] = { count: 0, image: p.image };
+        }
+        categoriesMap[p.category].count += 1;
+        if (!categoriesMap[p.category].image && p.image) {
+          categoriesMap[p.category].image = p.image;
+        }
       });
 
-      let html = '<div class="categories-list">';
+      let html = '<div class="categories-grid">';
       Object.keys(categoriesMap).forEach(cat => {
+        const item = categoriesMap[cat];
+        const imgUrl = item.image || 'https://via.placeholder.com/300?text=Немає+фото';
         html += `
           <div class="category-card" onclick="showCategoryProducts('${cat}')">
-            <span class="category-name">${cat}</span>
-            <span class="category-count">${categoriesMap[cat]} тов. ➔</span>
+            <img class="category-img" src="${imgUrl}" alt="${cat}">
+            <div class="category-info">
+              <span class="category-name">${cat}</span>
+              <span class="category-count">${item.count} тов.</span>
+            </div>
           </div>
         `;
       });
       html += '</div>';
 
-      categoriesContainer.innerHTML = html;
+      mainContent.innerHTML = html;
       document.getElementById('store-title').innerText = 'Категорії товарів';
     }
 
